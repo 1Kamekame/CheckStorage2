@@ -229,6 +229,7 @@ struct StorageWidgetEntryView: View {
                 .opacity(entry.GBTextHiddenAS ? 0 : 1)
                 .offset(x: (entry.GBTextHorizontalOffsetAS - 0.5) * 200, y: (entry.GBTextVerticalOffsetAS - 0.5) * 200)
             // ProgressView
+            let _ = print(entry.totalCapacity, entry.availableCapacity)
             ProgressView(value: (entry.totalCapacity - entry.availableCapacity) / entry.totalCapacity)
             // レガシー
 //            ProgressView(value: (parseGBString(entry.maxStorageformatter) - parseGBString(entry.freeStorageformatter)) / parseGBString(entry.maxStorageformatter))
@@ -275,29 +276,58 @@ extension Color {
 }
 
 // 容量取得
-// 容量取得 (同期用)
+//// 容量取得 (同期用)
+//func getStorageGB() -> (total: Double, available: Double) {
+//    let fileManager = FileManager.default
+//    guard let volumes = fileManager.mountedVolumeURLs(
+//        includingResourceValuesForKeys: [.volumeAvailableCapacityForImportantUsageKey, .volumeTotalCapacityKey],
+//        options: .skipHiddenVolumes
+//    ) else { return (0, 0) }
+//
+//    var totalCapacity: Int64 = 0
+//    var availableCapacity: Int64 = 0
+//
+//    for volumeURL in volumes {
+//        do {
+//            let values = try volumeURL.resourceValues(forKeys: [.volumeTotalCapacityKey, .volumeAvailableCapacityForImportantUsageKey])
+//            if let t = values.volumeTotalCapacity { totalCapacity += Int64(t) }
+//            if let a = values.volumeAvailableCapacityForImportantUsage { availableCapacity += Int64(a) }
+//        } catch {
+//            print("Error retrieving storage info for \(volumeURL.path): \(error)")
+//        }
+//    }
+//
+//    return (Double(totalCapacity) / 1024 / 1024 / 1024,
+//            Double(availableCapacity) / 1024 / 1024 / 1024)
+//}
+//
+//// 容量取得 (非同期/Widget用)
+//func getStorageGBAsync() async -> (Double, Double) {
+//    return await withCheckedContinuation { continuation in
+//        DispatchQueue.global(qos: .userInitiated).async {
+//            let result = getStorageGB()
+//            continuation.resume(returning: result)
+//        }
+//    }
+//}
+
+// 容量取得 (同期用) - メインボリュームのみ
 func getStorageGB() -> (total: Double, available: Double) {
-    let fileManager = FileManager.default
-    guard let volumes = fileManager.mountedVolumeURLs(
-        includingResourceValuesForKeys: [.volumeAvailableCapacityForImportantUsageKey, .volumeTotalCapacityKey],
-        options: .skipHiddenVolumes
-    ) else { return (0, 0) }
-
-    var totalCapacity: Int64 = 0
-    var availableCapacity: Int64 = 0
-
-    for volumeURL in volumes {
-        do {
-            let values = try volumeURL.resourceValues(forKeys: [.volumeTotalCapacityKey, .volumeAvailableCapacityForImportantUsageKey])
-            if let t = values.volumeTotalCapacity { totalCapacity += Int64(t) }
-            if let a = values.volumeAvailableCapacityForImportantUsage { availableCapacity += Int64(a) }
-        } catch {
-            print("Error retrieving storage info for \(volumeURL.path): \(error)")
-        }
+    let mainVolume = URL(fileURLWithPath: "/") // メインボリューム
+    do {
+        let values = try mainVolume.resourceValues(
+            forKeys: [.volumeTotalCapacityKey, .volumeAvailableCapacityForImportantUsageKey]
+        )
+        let totalCapacity = values.volumeTotalCapacity ?? 0
+        let availableCapacity = values.volumeAvailableCapacityForImportantUsage ?? 0
+        
+        return (Double(totalCapacity) / 1024 / 1024 / 1024,
+                Double(availableCapacity) / 1024 / 1024 / 1024)
+        
+    } catch {
+        print("Error retrieving main volume storage info: \(error)")
+        return (0, 0)
     }
-
-    return (Double(totalCapacity) / 1024 / 1024 / 1024,
-            Double(availableCapacity) / 1024 / 1024 / 1024)
 }
 
 // 容量取得 (非同期/Widget用)
@@ -309,6 +339,7 @@ func getStorageGBAsync() async -> (Double, Double) {
         }
     }
 }
+
 
 
 // MARK: -レガシー対応
