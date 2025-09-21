@@ -18,5 +18,12 @@ CheckStorage2 – an improved version of CheckStorage for macOS Tahoe.
 1. Download and unzip the ZIP file.
 2. Move the app to your Applications folder.
 3. Launch the app and verify its functionality, including widget placement.
-You can download the app from the following link.
-[CheckStorage2 - 2025:09:21.zip](https://github.com/user-attachments/files/22450005/CheckStorage2.-.2025.09.21.zip) — as of 2025/09/21.
+
+You may occasionally see the following warning:
+> “Apple could not verify ‘CheckStorage2’ is free of malware that may harm your Mac or compromise your privacy.”
+>
+If this happens, go to System Settings > Privacy & Security > Security, and click Open Anyway for CheckStorage2. This will allow the app to launch.
+**By downloading and using this app, you agree that you are solely responsible for any consequences.**
+
+You can download the app from the following link.  
+> [CheckStorage2 - 2025:09:21.zip](https://github.com/user-attachments/files/22450005/CheckStorage2.-.2025.09.21.zip) — as of 2025/09/21.
